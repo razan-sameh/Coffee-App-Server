@@ -1,9 +1,12 @@
 const express = require('express');
-const router = express.Router();
+const serverless = require('serverless-http');
 require("dotenv").config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-router.post('/create-payment-intent', async (req, res) => {
+const app = express();
+app.use(express.json());
+
+app.post('/api/payment/create-payment-intent', async (req, res) => {
     try {
         const { amount } = req.body;
 
@@ -21,4 +24,5 @@ router.post('/create-payment-intent', async (req, res) => {
     }
 });
 
-module.exports = router;
+module.exports = app;
+module.exports.handler = serverless(app);

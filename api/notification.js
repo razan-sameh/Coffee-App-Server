@@ -1,8 +1,11 @@
 const express = require("express");
-const router = express.Router();
+const serverless = require('serverless-http');
 const { statusMessages, enmOrderStatus } = require("../enums/orderStatus");
 const admin = require("../firebase-admin-init");
 const fetch = require("node-fetch");
+
+const app = express();
+app.use(express.json());
 
 // ✅ Keep track of active simulations (so multiple orders can run independently)
 const activeSimulations = {};
@@ -65,7 +68,7 @@ const sendNotification = async (uid, status, orderId) => {
 };
 
 // 🚀 Main simulation route
-router.post("/simulate-order/:uid/:orderId", async (req, res) => {
+app.post("/api/notification/simulate-order/:uid/:orderId", async (req, res) => {
   const { uid, orderId } = req.params;
 
   try {
@@ -148,5 +151,5 @@ router.post("/simulate-order/:uid/:orderId", async (req, res) => {
   }
 });
 
-
-module.exports = router;
+module.exports = app;
+module.exports.handler = serverless(app);

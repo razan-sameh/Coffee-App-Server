@@ -1,8 +1,11 @@
 const express = require('express');
-const router = express.Router();
+const serverless = require('serverless-http');
 const admin = require('../firebase-admin-init');
 
-router.delete('/delete', async (req, res) => {
+const app = express();
+app.use(express.json());
+
+app.delete('/api/user/delete', async (req, res) => {
     const { uid } = req.body;
     if (!uid) return res.status(400).json({ error: 'Missing UID' });
 
@@ -14,7 +17,7 @@ router.delete('/delete', async (req, res) => {
     }
 });
 
-router.post('/set-disabled', async (req, res) => {
+app.post('/api/user/set-disabled', async (req, res) => {
     const { uid, disabled } = req.body;
 
     if (!uid || typeof disabled !== 'boolean') {
@@ -30,7 +33,7 @@ router.post('/set-disabled', async (req, res) => {
 });
 
 // 🔹 Update FCM token for a user
-router.post("/update-fcm-token", async (req, res) => {
+app.post("/api/user/update-fcm-token", async (req, res) => {
     try {
         const { uid, fcmToken } = req.body;
 
@@ -46,4 +49,6 @@ router.post("/update-fcm-token", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-module.exports = router;
+
+module.exports = app;
+module.exports.handler = serverless(app);
