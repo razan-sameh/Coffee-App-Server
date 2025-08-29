@@ -1,6 +1,5 @@
 const express = require("express");
 const serverless = require('serverless-http');
-const { statusMessages, enmOrderStatus } = require("../enums/orderStatus");
 const admin = require("../firebase-admin-init");
 const fetch = require("node-fetch");
 
@@ -9,6 +8,37 @@ app.use(express.json());
 
 // ✅ Keep track of active simulations (so multiple orders can run independently)
 const activeSimulations = {};
+
+const enmOrderStatus = {
+    Placed: 'placed',
+    Brewing: 'brewing',
+    Ready: 'ready',
+    OutForDelivery: 'out_for_delivery',
+    Delivered: 'delivered',
+};
+
+const statusMessages = {
+    [enmOrderStatus.Placed]: (id) => ({
+        title: '☕ Your order is confirmed!',
+        body: `Order #${id} has been received and will be prepared soon.`,
+    }),
+    [enmOrderStatus.Brewing]: (id) => ({
+        title: 'Your order is brewing ☁️',
+        body: `Order #${id} is being prepared.`,
+    }),
+    [enmOrderStatus.Ready]: (id) => ({
+        title: 'Your order is ready at the counter.',
+        body: `Order #${id} is ready for pickup.`,
+    }),
+    [enmOrderStatus.OutForDelivery]: (id) => ({
+        title: 'Your coffee is on its way 🚚',
+        body: `Order #${id} is out for delivery.`,
+    }),
+    [enmOrderStatus.Delivered]: (id) => ({
+        title: 'Enjoy your coffee! ☕',
+        body: `Order #${id} has been delivered.`,
+    }),
+};
 
 // Utility: fetch full OSRM route (array of coordinates)
 const fetchRoute = async (start, destination) => {
